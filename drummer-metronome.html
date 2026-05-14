@@ -100,6 +100,7 @@
   }
   .song-select:hover, .song-select:focus { border-color: #3a3a3a; }
   .song-select option { background: #1a1a1a; }
+  .song-select optgroup { background: #111; color: #444; font-size: 0.65rem; letter-spacing: 0.15em; }
 
   .song-info {
     text-align: center;
@@ -181,8 +182,8 @@
     border-radius: 1px;
     transition: background 0.08s;
   }
-  .wall.hit { background: #222; border-color: #3c3c3c; }
-  .wall.hit .wall-inner { background: #444; }
+  .wall.hit { background: #2e2e2e; border-color: #585858; }
+  .wall.hit .wall-inner { background: #6a6a6a; }
 
   .sphere-wrap {
     position: absolute;
@@ -272,7 +273,20 @@
   }
   .done-msg.visible { opacity: 1; }
 
-  /* ── Controls ── */
+  /* ── Loop toggle ── */
+  .btn-loop {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid #202020;
+    font-size: 0.78rem;
+    padding: 11px 20px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn-loop:hover { color: #888; border-color: #333; }
+  .btn-loop.active { color: var(--accent); border-color: var(--accent); }
+  .loop-icon { font-size: 0.9rem; line-height: 1; }
   .controls { display: flex; gap: 14px; align-items: center; }
   .btn {
     font-family: 'Bebas Neue', sans-serif;
@@ -322,13 +336,19 @@
     <div class="selector-label">Select Track</div>
     <select class="song-select" id="songSelect">
       <option value="">— Choose a song —</option>
-      <option value="californication">Californication — Red Hot Chili Peppers</option>
-      <option value="yellow">Yellow — Coldplay</option>
-      <option value="take_it_easy">Take It Easy — Eagles</option>
-      <option value="we_are_the_champions">We Are the Champions — Queen</option>
-      <option value="this_love">This Love — Maroon 5</option>
-      <option value="end_of_beginning">End of Beginning — Djo</option>
-      <option value="imagine">Imagine — John Lennon</option>
+      <optgroup label="── Set 1 ──────────────────">
+        <option value="californication">Californication — Red Hot Chili Peppers</option>
+        <option value="yellow">Yellow — Coldplay</option>
+        <option value="we_are_the_champions">We Are the Champions — Queen</option>
+        <option value="this_love">This Love — Maroon 5</option>
+        <option value="end_of_beginning">End of Beginning — Djo</option>
+      </optgroup>
+      <optgroup label="── Set 2 ──────────────────">
+        <option value="all_star">All Star — Smash Mouth</option>
+        <option value="living_on_a_prayer">Livin' on a Prayer — Bon Jovi</option>
+        <option value="gives_you_hell">Gives You Hell — The All-American Rejects</option>
+        <option value="treasure">Treasure — Bruno Mars</option>
+      </optgroup>
     </select>
   </div>
 
@@ -360,6 +380,7 @@
 
   <div class="controls">
     <button class="btn btn-secondary" onclick="stopMetronome()">STOP</button>
+    <button class="btn btn-loop" id="loopBtn" onclick="toggleLoop()"><span class="loop-icon">⟳</span> LOOP</button>
     <button class="btn btn-primary" id="startBtn" onclick="startMetronome()" disabled>START</button>
   </div>
 </main>
@@ -372,21 +393,21 @@
 
 <script>
 // ─────────────────────────────────────────────────────────────
-//  SONG DATA  (felt drummer quarter-note BPM)
-//  Yellow / End of Beginning: half-time of detected double-time
-//  Imagine: Wikipedia + multiple sources confirm ~75-76 BPM
+//  SONG DATA
 // ─────────────────────────────────────────────────────────────
 const SONGS = {
-  californication:      { title: 'CALIFORNICATION',      artist: 'Red Hot Chili Peppers', bpm: 96  },
-  yellow:               { title: 'YELLOW',               artist: 'Coldplay',              bpm: 86  },
-  take_it_easy:         { title: 'TAKE IT EASY',         artist: 'Eagles',                bpm: 138 },
-  we_are_the_champions: { title: 'WE ARE THE CHAMPIONS', artist: 'Queen',                 bpm: 63  },
-  this_love:            { title: 'THIS LOVE',            artist: 'Maroon 5',              bpm: 95  },
-  end_of_beginning:     { title: 'END OF BEGINNING',     artist: 'Djo',                   bpm: 80  },
-  imagine:              { title: 'IMAGINE',              artist: 'John Lennon',            bpm: 76  },
+  californication:      { title: 'CALIFORNICATION',      artist: 'Red Hot Chili Peppers',    bpm: 96  },
+  yellow:               { title: 'YELLOW',               artist: 'Coldplay',                 bpm: 86  },
+  we_are_the_champions: { title: 'WE ARE THE CHAMPIONS', artist: 'Queen',                    bpm: 63  },
+  this_love:            { title: 'THIS LOVE',            artist: 'Maroon 5',                 bpm: 95  },
+  end_of_beginning:     { title: 'END OF BEGINNING',     artist: 'Djo',                      bpm: 80  },
+  all_star:             { title: 'ALL STAR',             artist: 'Smash Mouth',              bpm: 104 },
+  living_on_a_prayer:   { title: "LIVIN' ON A PRAYER",   artist: 'Bon Jovi',                 bpm: 123 },
+  gives_you_hell:       { title: 'GIVES YOU HELL',       artist: 'The All-American Rejects', bpm: 100 },
+  treasure:             { title: 'TREASURE',             artist: 'Bruno Mars',               bpm: 116 },
 };
 
-const MAX_SWINGS = 12;   // sphere touches a wall = 1 swing
+const MAX_SWINGS = 12;
 
 // ─────────────────────────────────────────────────────────────
 //  STATE
@@ -397,7 +418,8 @@ let rafId       = null;
 let legStart    = 0;
 let goingRight  = true;
 let beatIdx     = 0;
-let swingCount  = 0;     // how many wall-touches have happened
+let swingCount  = 0;
+let loopEnabled = false;
 
 // ─────────────────────────────────────────────────────────────
 //  GEOMETRY
@@ -417,7 +439,7 @@ function placeSphere(t) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  EASING  — linear centre, soft cushion at walls
+//  EASING
 // ─────────────────────────────────────────────────────────────
 function ballEase(t) {
   const E = 0.125;
@@ -433,7 +455,7 @@ function ballEase(t) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  BEAT DOTS  (4/4)
+//  BEAT DOTS
 // ─────────────────────────────────────────────────────────────
 function buildBeatDots() {
   const c = document.getElementById('beatCounter');
@@ -453,7 +475,7 @@ function lightBeatDot(i) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  SWING DOTS  (12 circles, filled as swings complete)
+//  SWING DOTS
 // ─────────────────────────────────────────────────────────────
 function buildSwingDots() {
   const c = document.getElementById('swingDots');
@@ -469,12 +491,11 @@ function buildSwingDots() {
 }
 
 function updateSwingDots(count) {
-  // count = number of completed swings (0-indexed next pending = count)
   for (let i = 0; i < MAX_SWINGS; i++) {
     const d = document.getElementById('sw' + i);
     if (!d) continue;
     d.classList.remove('done', 'current');
-    if (i < count - 1)      d.classList.add('done');
+    if (i < count - 1)        d.classList.add('done');
     else if (i === count - 1) d.classList.add('current');
   }
 }
@@ -494,8 +515,6 @@ function wallHit(side) {
 
 // ─────────────────────────────────────────────────────────────
 //  ANIMATION LOOP
-//  One leg (left wall → right wall, or vice versa) = ONE beat.
-//  Every wall arrival = one swing.  Stop after MAX_SWINGS.
 // ─────────────────────────────────────────────────────────────
 function loop(ts) {
   if (!running) return;
@@ -505,7 +524,6 @@ function loop(ts) {
   let t = elapsed / beatMs;
 
   if (t >= 1) {
-    // ── arrived at wall ──
     const side = goingRight ? 'right' : 'left';
     placeSphere(goingRight ? 1 : 0);
     wallHit(side);
@@ -517,7 +535,17 @@ function loop(ts) {
     updateSwingDots(swingCount);
 
     if (swingCount >= MAX_SWINGS) {
-      // ── all 12 swings done ──
+      if (loopEnabled) {
+        // restart seamlessly
+        swingCount = 0;
+        goingRight = !goingRight;
+        legStart   = ts;
+        buildSwingDots();
+        updateSwingDots(0);
+        document.querySelector('.swing-label').textContent = '∞  looping';
+        rafId = requestAnimationFrame(loop);
+        return;
+      }
       running = false;
       document.getElementById('doneMsg').classList.add('visible');
       document.getElementById('startBtn').textContent = 'START';
@@ -531,7 +559,6 @@ function loop(ts) {
     return;
   }
 
-  // ── in flight ──
   const eased = ballEase(t);
   placeSphere(goingRight ? eased : 1 - eased);
   rafId = requestAnimationFrame(loop);
@@ -540,6 +567,17 @@ function loop(ts) {
 // ─────────────────────────────────────────────────────────────
 //  CONTROLS
 // ─────────────────────────────────────────────────────────────
+function toggleLoop() {
+  loopEnabled = !loopEnabled;
+  const btn = document.getElementById('loopBtn');
+  btn.classList.toggle('active', loopEnabled);
+  // hide done msg if loop just turned on while stopped
+  if (loopEnabled) {
+    const dm = document.getElementById('doneMsg');
+    if (dm) dm.classList.remove('visible');
+  }
+}
+
 function startMetronome() {
   if (!song) return;
   stopMetronome(true);
@@ -552,6 +590,8 @@ function startMetronome() {
 
   buildSwingDots();
   updateSwingDots(0);
+  // update label based on loop mode
+  document.querySelector('.swing-label').textContent = loopEnabled ? '∞  looping' : 'Swings remaining';
   placeSphere(0);
   lightBeatDot(0);
   wallHit('left');
@@ -571,7 +611,6 @@ function stopMetronome(silent) {
   lightBeatDot(-1);
   wallHit(null);
 
-  // Reset swing dots visuals
   for (let i = 0; i < MAX_SWINGS; i++) {
     const d = document.getElementById('sw' + i);
     if (d) d.classList.remove('done', 'current');
