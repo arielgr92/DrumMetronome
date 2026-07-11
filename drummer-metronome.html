@@ -8,13 +8,15 @@
 <style>
   :root {
     --bg: #0c0c0c;
-    --surface: #141414;
-    --wall-bg: #1c1c1c;
-    --wall-border: #2e2e2e;
+    --surface: #161616;
+    --surface-hover: #202020;
+    --wall-bg: #262626;
+    --wall-border: #454545;
     --accent: #e84040;
+    --accent-bright: #ff6b6b;
     --text: #eeebe6;
-    --muted: #555;
-    --track: #1e1e1e;
+    --muted: #686868;
+    --track: #292929;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,19 +29,23 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    overflow: hidden;
+    overflow-x: hidden;
   }
+
+  button { font: inherit; }
 
   header {
     position: fixed;
     top: 0; left: 0; right: 0;
-    padding: 18px 36px;
+    height: 58px;
+    padding: 0 36px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: rgba(12, 12, 12, 0.94);
+    backdrop-filter: blur(8px);
     border-bottom: 1px solid #1a1a1a;
-    z-index: 10;
+    z-index: 20;
   }
   .logo {
     font-family: 'Bebas Neue', sans-serif;
@@ -59,84 +65,120 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 28px;
+    gap: 14px;
     width: 100%;
-    max-width: 860px;
-    padding: 20px;
+    max-width: 1180px;
+    padding: 76px 24px 52px;
   }
 
+  /* ── Song buttons ── */
   .selector-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 9px;
     width: 100%;
   }
   .selector-label {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     letter-spacing: 0.3em;
     color: var(--muted);
     text-transform: uppercase;
   }
-  .song-select {
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid #242424;
-    border-radius: 3px;
-    padding: 13px 20px;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.82rem;
+  .song-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
     width: 100%;
-    max-width: 480px;
-    appearance: none;
+  }
+  .song-btn {
+    min-height: 46px;
+    padding: 7px 10px;
+    background: var(--surface);
+    color: #aaa;
+    border: 1px solid #292929;
+    border-radius: 4px;
     cursor: pointer;
     outline: none;
     text-align: center;
-    transition: border-color 0.2s;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 36px;
+    transition: background 0.14s, border-color 0.14s, color 0.14s, transform 0.08s, box-shadow 0.14s;
   }
-  .song-select:hover, .song-select:focus { border-color: #3a3a3a; }
-  .song-select option { background: #1a1a1a; }
-  .song-select optgroup { background: #111; color: #444; font-size: 0.65rem; letter-spacing: 0.15em; }
+  .song-btn:hover {
+    background: var(--surface-hover);
+    border-color: #424242;
+    color: var(--text);
+  }
+  .song-btn:active { transform: translateY(1px); }
+  .song-btn.active {
+    color: #fff;
+    background: #251718;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(232, 64, 64, 0.18), 0 0 16px rgba(232, 64, 64, 0.12);
+  }
+  .song-btn-title {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.09em;
+    line-height: 1.05;
+  }
+  .song-btn-artist {
+    display: block;
+    margin-top: 3px;
+    color: #5f5f5f;
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .song-btn.active .song-btn-artist { color: #a66; }
 
-  .song-info {
-    text-align: center;
-    min-height: 52px;
+  /* ── Current song and compact BPM ── */
+  .current-row {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    gap: 22px;
+    width: 100%;
+    min-height: 60px;
+  }
+  .song-info {
+    text-align: right;
+    min-width: 250px;
   }
   .song-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.1rem;
+    font-size: 2rem;
     letter-spacing: 0.1em;
     line-height: 1;
   }
   .song-artist {
-    font-size: 0.65rem;
-    letter-spacing: 0.28em;
+    margin-top: 4px;
+    font-size: 0.6rem;
+    letter-spacing: 0.24em;
     color: var(--muted);
     text-transform: uppercase;
   }
-
   .bpm-display {
     display: flex;
     align-items: baseline;
-    gap: 8px;
+    gap: 5px;
+    padding: 4px 11px 3px;
+    background: #121212;
+    border: 1px solid #202020;
+    border-radius: 4px;
   }
   .bpm-number {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 5rem;
+    font-size: 3.15rem;
     color: var(--accent);
-    line-height: 1;
+    line-height: 0.9;
   }
   .bpm-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
+    font-size: 0.54rem;
+    letter-spacing: 0.16em;
     color: var(--muted);
     text-transform: uppercase;
   }
@@ -144,11 +186,12 @@
   /* ── Stage ── */
   .stage {
     width: 100%;
-    max-width: 720px;
-    height: 160px;
+    max-width: 820px;
+    height: 145px;
     position: relative;
     display: flex;
     align-items: center;
+    isolation: isolate;
   }
   .track-groove {
     position: absolute;
@@ -172,40 +215,80 @@
     align-items: center;
     justify-content: center;
     z-index: 2;
-    transition: background 0.08s, border-color 0.08s;
+    transition: background 0.08s, border-color 0.08s, box-shadow 0.08s;
   }
   .wall-left  { left: 48px; }
   .wall-right { right: 48px; }
   .wall-inner {
-    width: 2px; height: 52%;
-    background: var(--wall-border);
+    width: 2px;
+    height: 52%;
+    background: #555;
     border-radius: 1px;
-    transition: background 0.08s;
+    transition: background 0.08s, box-shadow 0.08s;
   }
-  .wall.hit { background: #2e2e2e; border-color: #585858; }
-  .wall.hit .wall-inner { background: #6a6a6a; }
+  .wall.hit {
+    background: #8a3438;
+    border-color: #ffd3d3;
+    box-shadow: 0 0 12px rgba(255, 95, 95, 0.95), 0 0 34px rgba(232, 64, 64, 0.62);
+    animation: wallFlash 150ms ease-out;
+  }
+  .wall.hit .wall-inner {
+    background: #fff;
+    box-shadow: 0 0 10px #fff;
+  }
+  @keyframes wallFlash {
+    0%   { filter: brightness(2.6); transform: translateY(-50%) scaleY(1.07); }
+    100% { filter: brightness(1); transform: translateY(-50%) scaleY(1); }
+  }
+
+  .impact-flash {
+    position: absolute;
+    top: 50%;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    transform: translateY(-50%) scale(0.3);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(circle, rgba(255,255,255,0.72) 0%, rgba(255,98,98,0.28) 32%, rgba(232,64,64,0) 72%);
+  }
+  .impact-flash.left { left: -10px; }
+  .impact-flash.right { right: -10px; }
+  .impact-flash.flash { animation: impactFlash 190ms ease-out; }
+  @keyframes impactFlash {
+    0%   { opacity: 0.95; transform: translateY(-50%) scale(0.3); }
+    100% { opacity: 0; transform: translateY(-50%) scale(1.15); }
+  }
 
   .sphere-wrap {
     position: absolute;
     top: 50%;
-    width: 48px; height: 48px;
+    width: 48px;
+    height: 48px;
     transform: translateY(-50%) translateX(-50%);
     z-index: 5;
     will-change: left;
   }
   .sphere {
-    width: 48px; height: 48px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background: radial-gradient(circle at 38% 32%, #ff8080 0%, var(--accent) 48%, #6e0000 100%);
+    background: radial-gradient(circle at 38% 32%, #ff9b9b 0%, var(--accent) 48%, #6e0000 100%);
     box-shadow: 0 4px 14px rgba(0,0,0,0.65);
     position: relative;
+  }
+  .sphere.impact { animation: ballImpact 145ms ease-out; }
+  @keyframes ballImpact {
+    0%   { filter: brightness(2.1); box-shadow: 0 0 24px rgba(255, 95, 95, 0.95); transform: scale(1.12); }
+    100% { filter: brightness(1); box-shadow: 0 4px 14px rgba(0,0,0,0.65); transform: scale(1); }
   }
   .sphere::after {
     content: '';
     position: absolute;
     top: 9px; left: 12px;
     width: 10px; height: 6px;
-    background: rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.32);
     border-radius: 50%;
     transform: rotate(-28deg);
   }
@@ -220,24 +303,69 @@
   .beat-dot {
     width: 9px; height: 9px;
     border-radius: 50%;
-    border: 1px solid #282828;
-    background: #161616;
-    transition: background 0.07s, border-color 0.07s;
+    border: 1px solid #343434;
+    background: #181818;
+    transition: background 0.07s, border-color 0.07s, box-shadow 0.07s;
   }
   .beat-dot.downbeat { width: 13px; height: 13px; }
-  .beat-dot.active { background: var(--accent); border-color: var(--accent); }
+  .beat-dot.active {
+    background: var(--accent);
+    border-color: var(--accent-bright);
+    box-shadow: 0 0 9px rgba(232, 64, 64, 0.7);
+  }
+
+  /* ── Valerie 3-point split ── */
+  .triplet-wrap {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-height: 38px;
+  }
+  .triplet-wrap.visible { display: flex; }
+  .triplet-label {
+    font-size: 0.56rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .triplet-count {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .triplet-step {
+    width: 29px;
+    height: 29px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid #333;
+    background: #161616;
+    color: #606060;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.05rem;
+    transition: background 0.07s, color 0.07s, border-color 0.07s, box-shadow 0.07s, transform 0.07s;
+  }
+  .triplet-step.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: #ff8888;
+    box-shadow: 0 0 12px rgba(232, 64, 64, 0.75);
+    transform: scale(1.08);
+  }
 
   /* ── Swing counter ── */
   .swing-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    min-height: 36px;
+    gap: 7px;
+    min-height: 34px;
   }
   .swing-label {
-    font-size: 0.58rem;
-    letter-spacing: 0.28em;
+    font-size: 0.56rem;
+    letter-spacing: 0.26em;
     color: var(--muted);
     text-transform: uppercase;
   }
@@ -247,81 +375,198 @@
     align-items: center;
   }
   .swing-dot {
-    width: 10px; height: 10px;
+    width: 9px; height: 9px;
     border-radius: 50%;
-    border: 1px solid #262626;
-    background: #141414;
+    border: 1px solid #303030;
+    background: #161616;
     transition: background 0.12s, border-color 0.12s;
   }
-  .swing-dot.done {
-    background: #333;
-    border-color: #444;
-  }
-  .swing-dot.current {
-    background: var(--accent);
-    border-color: var(--accent);
-  }
+  .swing-dot.done { background: #393939; border-color: #4c4c4c; }
+  .swing-dot.current { background: var(--accent); border-color: var(--accent); }
 
-  /* Done message */
   .done-msg {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     letter-spacing: 0.18em;
     color: var(--muted);
     opacity: 0;
+    height: 0;
     transition: opacity 0.4s;
   }
-  .done-msg.visible { opacity: 1; }
+  .done-msg.visible { opacity: 1; height: auto; }
 
-  /* ── Loop toggle ── */
-  .btn-loop {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid #202020;
-    font-size: 0.78rem;
-    padding: 11px 20px;
+  /* ── Controls ── */
+  .controls {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
     align-items: center;
-    gap: 7px;
   }
-  .btn-loop:hover { color: #888; border-color: #333; }
-  .btn-loop.active { color: var(--accent); border-color: var(--accent); }
-  .loop-icon { font-size: 0.9rem; line-height: 1; }
-  .controls { display: flex; gap: 14px; align-items: center; }
   .btn {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1rem;
-    letter-spacing: 0.18em;
-    padding: 11px 30px;
+    letter-spacing: 0.16em;
+    padding: 10px 25px;
     border: none;
     border-radius: 3px;
     cursor: pointer;
     outline: none;
-    transition: background 0.14s, opacity 0.14s;
+    transition: background 0.14s, opacity 0.14s, color 0.14s, border-color 0.14s;
   }
   .btn-primary { background: var(--accent); color: #fff; }
   .btn-primary:hover:not(:disabled) { background: #f05555; }
   .btn-primary:disabled { opacity: 0.32; cursor: default; }
-  .btn-secondary { background: transparent; color: var(--muted); border: 1px solid #202020; }
-  .btn-secondary:hover { color: #888; border-color: #333; }
+  .btn-secondary,
+  .btn-loop,
+  .btn-chart {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid #2a2a2a;
+  }
+  .btn-secondary:hover,
+  .btn-loop:hover,
+  .btn-chart:hover { color: #aaa; border-color: #444; }
+  .btn-loop {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn-loop.active { color: var(--accent); border-color: var(--accent); }
+  .loop-icon { font-size: 0.9rem; line-height: 1; }
+  .btn-chart {
+    display: none;
+    color: #d7d7d7;
+  }
+  .btn-chart.visible { display: inline-block; }
+
+  /* ── Drum chart modal ── */
+  .chart-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(7px);
+  }
+  .chart-modal.open { display: flex; }
+  .chart-panel {
+    position: relative;
+    width: min(1100px, 96vw);
+    height: min(88vh, 900px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    background: #111;
+    border: 1px solid #3b3b3b;
+    border-radius: 6px;
+    box-shadow: 0 22px 80px rgba(0,0,0,0.8);
+  }
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+  .chart-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.12em;
+  }
+  .chart-close {
+    width: 38px;
+    height: 34px;
+    border: 1px solid #333;
+    border-radius: 3px;
+    background: #191919;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 1.2rem;
+  }
+  .chart-close:hover { color: #fff; border-color: #666; }
+  .chart-image-wrap {
+    min-height: 0;
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background: #080808;
+    border-radius: 3px;
+  }
+  .chart-image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+  .chart-error {
+    display: none;
+    margin: auto;
+    max-width: 650px;
+    padding: 28px;
+    color: #aaa;
+    text-align: center;
+    line-height: 1.7;
+    font-size: 0.72rem;
+  }
+  .chart-error code { color: #fff; }
 
   footer {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    padding: 10px 36px;
+    padding: 9px 36px;
+    background: rgba(12, 12, 12, 0.94);
     border-top: 1px solid #161616;
     display: flex;
     justify-content: center;
     gap: 10px;
     align-items: center;
+    z-index: 20;
   }
   footer span {
-    font-size: 0.55rem;
+    font-size: 0.52rem;
     letter-spacing: 0.22em;
-    color: #2a2a2a;
+    color: #303030;
     text-transform: uppercase;
   }
-  .sep { width: 3px; height: 3px; background: #2a2a2a; border-radius: 50%; }
+  .sep { width: 3px; height: 3px; background: #303030; border-radius: 50%; }
+
+  @media (max-width: 900px) {
+    .song-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    main { padding-top: 72px; }
+  }
+
+  @media (max-width: 620px) {
+    header { padding: 0 18px; }
+    main { padding: 72px 12px 48px; gap: 12px; }
+    .song-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    .song-btn { min-height: 43px; padding: 6px 7px; }
+    .current-row { gap: 12px; }
+    .song-info { min-width: 0; flex: 1; }
+    .song-title { font-size: 1.55rem; }
+    .bpm-number { font-size: 2.6rem; }
+    .stage { height: 125px; }
+    .wall-left { left: 20px; }
+    .wall-right { right: 20px; }
+    .track-groove { left: 42px; right: 42px; }
+    .btn { padding: 9px 18px; }
+    footer { display: none; }
+  }
+
+  @media (max-height: 780px) and (min-width: 700px) {
+    main { gap: 9px; padding-top: 66px; padding-bottom: 42px; }
+    .song-btn { min-height: 40px; }
+    .stage { height: 115px; }
+    .wall { height: 92px; }
+    .current-row { min-height: 48px; }
+    .song-title { font-size: 1.7rem; }
+    .bpm-number { font-size: 2.75rem; }
+  }
 </style>
 </head>
 <body>
@@ -334,45 +579,40 @@
 <main>
   <div class="selector-wrap">
     <div class="selector-label">Select Track</div>
-    <select class="song-select" id="songSelect">
-      <option value="">— Choose a song —</option>
-      <optgroup label="── Set 1 ──────────────────">
-        <option value="yellow">Yellow — Coldplay</option>
-        <option value="this_love">This Love — Maroon 5</option>
-        <option value="end_of_beginning">End of Beginning — Djo</option>
-        <option value="valerie">Valerie — Amy Winehouse</option>
-      </optgroup>
-      <optgroup label="── Set 2 ──────────────────">
-        <option value="all_star">All Star — Smash Mouth</option>
-        <option value="living_on_a_prayer">Livin' on a Prayer — Bon Jovi</option>
-        <option value="gives_you_hell">Gives You Hell — The All-American Rejects</option>
-        <option value="treasure">Treasure — Bruno Mars</option>
-        <option value="since_u_been_gone">Since U Been Gone — Kelly Clarkson</option>
-        <option value="shut_up_and_dance">Shut Up and Dance — Walk the Moon</option>
-      </optgroup>
-    </select>
+    <div class="song-grid" id="songGrid" role="radiogroup" aria-label="Select a song"></div>
   </div>
 
-  <div class="song-info">
-    <div class="song-title"  id="songTitle">SELECT A SONG</div>
-    <div class="song-artist" id="songArtist">to begin</div>
-  </div>
-
-  <div class="bpm-display">
-    <div class="bpm-number" id="bpmDisplay">—</div>
-    <div class="bpm-label">BPM</div>
+  <div class="current-row">
+    <div class="song-info">
+      <div class="song-title" id="songTitle">SELECT A SONG</div>
+      <div class="song-artist" id="songArtist">to begin</div>
+    </div>
+    <div class="bpm-display" aria-label="Tempo">
+      <div class="bpm-number" id="bpmDisplay">—</div>
+      <div class="bpm-label">BPM</div>
+    </div>
   </div>
 
   <div class="stage" id="stage">
     <div class="track-groove"></div>
-    <div class="wall wall-left"  id="wallLeft"><div class="wall-inner"></div></div>
+    <div class="impact-flash left" id="flashLeft"></div>
+    <div class="impact-flash right" id="flashRight"></div>
+    <div class="wall wall-left" id="wallLeft"><div class="wall-inner"></div></div>
     <div class="wall wall-right" id="wallRight"><div class="wall-inner"></div></div>
-    <div class="sphere-wrap" id="sphereWrap"><div class="sphere"></div></div>
+    <div class="sphere-wrap" id="sphereWrap"><div class="sphere" id="sphere"></div></div>
   </div>
 
   <div class="beat-counter" id="beatCounter"></div>
 
-  <!-- Swing counter: 12 swings (wall touches) -->
+  <div class="triplet-wrap" id="tripletWrap" aria-live="polite">
+    <div class="triplet-label">Valerie · 3-point split</div>
+    <div class="triplet-count">
+      <div class="triplet-step" id="triplet0">1</div>
+      <div class="triplet-step" id="triplet1">2</div>
+      <div class="triplet-step" id="triplet2">3</div>
+    </div>
+  </div>
+
   <div class="swing-wrap" id="swingWrap" style="display:none">
     <div class="swing-label">Swings remaining</div>
     <div class="swing-dots" id="swingDots"></div>
@@ -380,11 +620,25 @@
   </div>
 
   <div class="controls">
-    <button class="btn btn-secondary" onclick="stopMetronome()">STOP</button>
-    <button class="btn btn-loop" id="loopBtn" onclick="toggleLoop()"><span class="loop-icon">⟳</span> LOOP</button>
-    <button class="btn btn-primary" id="startBtn" onclick="startMetronome()" disabled>START</button>
+    <button class="btn btn-secondary" type="button" onclick="stopMetronome()">STOP</button>
+    <button class="btn btn-loop" type="button" id="loopBtn" onclick="toggleLoop()"><span class="loop-icon">⟳</span> LOOP</button>
+    <button class="btn btn-chart" type="button" id="chartBtn" onclick="openChart()">DRUM CHART</button>
+    <button class="btn btn-primary" type="button" id="startBtn" onclick="startMetronome()" disabled>START</button>
   </div>
 </main>
+
+<div class="chart-modal" id="chartModal" role="dialog" aria-modal="true" aria-labelledby="chartTitle" onclick="closeChartFromBackdrop(event)">
+  <div class="chart-panel">
+    <div class="chart-header">
+      <div class="chart-title" id="chartTitle">DRUM CHART</div>
+      <button class="chart-close" type="button" onclick="closeChart()" aria-label="Close drum chart">✕</button>
+    </div>
+    <div class="chart-image-wrap">
+      <img class="chart-image" id="chartImage" src="" alt="Drum instructions">
+      <div class="chart-error" id="chartError"></div>
+    </div>
+  </div>
+</div>
 
 <footer>
   <span>Drummer's Metronome</span>
@@ -395,43 +649,104 @@
 <script>
 // ─────────────────────────────────────────────────────────────
 //  SONG DATA
+//  chart filenames are expected beside this HTML file.
 // ─────────────────────────────────────────────────────────────
 const SONGS = {
   yellow:               { title: 'YELLOW',               artist: 'Coldplay',                 bpm: 86  },
   this_love:            { title: 'THIS LOVE',            artist: 'Maroon 5',                 bpm: 95  },
   end_of_beginning:     { title: 'END OF BEGINNING',     artist: 'Djo',                      bpm: 80  },
-  valerie:              { title: 'VALERIE',              artist: 'Amy Winehouse',            bpm: 106 },
-  all_star:             { title: 'ALL STAR',             artist: 'Smash Mouth',              bpm: 104 },
-  living_on_a_prayer:   { title: "LIVIN' ON A PRAYER",   artist: 'Bon Jovi',                 bpm: 123 },
+  valerie:              { title: 'VALERIE',              artist: 'Amy Winehouse',            bpm: 106, triplet: true },
+  all_star:             { title: 'ALL STAR',             artist: 'Smash Mouth',              bpm: 104, chart: 'AS.jpeg' },
+  living_on_a_prayer:   { title: "LIVIN' ON A PRAYER", artist: 'Bon Jovi',                 bpm: 123 },
   gives_you_hell:       { title: 'GIVES YOU HELL',       artist: 'The All-American Rejects', bpm: 100 },
   treasure:             { title: 'TREASURE',             artist: 'Bruno Mars',               bpm: 116 },
-  since_u_been_gone:    { title: 'SINCE U BEEN GONE',    artist: 'Kelly Clarkson',           bpm: 132 },
-  shut_up_and_dance:    { title: 'SHUT UP AND DANCE',    artist: 'Walk the Moon',            bpm: 128 },
+  since_u_been_gone:    { title: 'SINCE U BEEN GONE',    artist: 'Kelly Clarkson',           bpm: 132, chart: 'Since.jpeg' },
+  shut_up_and_dance:    { title: 'SHUT UP AND DANCE',    artist: 'Walk the Moon',            bpm: 128, chart: 'SnD.jpeg' }
 };
+
+const SONG_ORDER = [
+  'yellow', 'this_love', 'end_of_beginning', 'valerie', 'all_star',
+  'living_on_a_prayer', 'gives_you_hell', 'treasure', 'since_u_been_gone', 'shut_up_and_dance'
+];
 
 const MAX_SWINGS = 12;
 
 // ─────────────────────────────────────────────────────────────
 //  STATE
 // ─────────────────────────────────────────────────────────────
-let song        = null;
-let running     = false;
-let rafId       = null;
-let legStart    = 0;
-let goingRight  = true;
-let beatIdx     = 0;
-let swingCount  = 0;
+let song = null;
+let selectedKey = null;
+let running = false;
+let rafId = null;
+let legStart = 0;
+let goingRight = true;
+let beatIdx = 0;
+let swingCount = 0;
 let loopEnabled = false;
+let wallTimer = null;
+
+// ─────────────────────────────────────────────────────────────
+//  SONG BUTTONS
+// ─────────────────────────────────────────────────────────────
+function buildSongButtons() {
+  const grid = document.getElementById('songGrid');
+  grid.innerHTML = '';
+
+  SONG_ORDER.forEach((key) => {
+    const item = SONGS[key];
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'song-btn';
+    button.dataset.song = key;
+    button.setAttribute('role', 'radio');
+    button.setAttribute('aria-checked', 'false');
+    button.innerHTML = `<span class="song-btn-title">${item.title}</span><span class="song-btn-artist">${item.artist}</span>`;
+    button.addEventListener('click', () => selectSong(key));
+    grid.appendChild(button);
+  });
+}
+
+function selectSong(key) {
+  stopMetronome(false);
+  closeChart();
+  document.getElementById('swingWrap').style.display = 'none';
+
+  selectedKey = key;
+  song = SONGS[key];
+
+  document.querySelectorAll('.song-btn').forEach((button) => {
+    const active = button.dataset.song === key;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-checked', String(active));
+  });
+
+  document.getElementById('songTitle').textContent = song.title;
+  document.getElementById('songArtist').textContent = song.artist;
+  document.getElementById('bpmDisplay').textContent = song.bpm;
+  document.getElementById('startBtn').disabled = false;
+
+  const chartBtn = document.getElementById('chartBtn');
+  chartBtn.classList.toggle('visible', Boolean(song.chart));
+  chartBtn.textContent = song.chart ? 'DRUM CHART' : 'DRUM CHART';
+
+  document.getElementById('tripletWrap').classList.toggle('visible', Boolean(song.triplet));
+  lightTriplet(-1);
+  buildBeatDots();
+}
 
 // ─────────────────────────────────────────────────────────────
 //  GEOMETRY
 // ─────────────────────────────────────────────────────────────
 function getStageBounds() {
-  const W      = document.getElementById('stage').offsetWidth;
-  const SPHERE = 48, WALL_W = 16, PAD = 48;
+  const stage = document.getElementById('stage');
+  const width = stage.offsetWidth;
+  const sphereSize = 48;
+  const wallWidth = 16;
+  const pad = window.innerWidth <= 620 ? 20 : 48;
+
   return {
-    xLeft:  PAD + WALL_W + SPHERE / 2,
-    xRight: W - PAD - WALL_W - SPHERE / 2,
+    xLeft: pad + wallWidth + sphereSize / 2,
+    xRight: width - pad - wallWidth - sphereSize / 2
   };
 }
 
@@ -460,33 +775,53 @@ function ballEase(t) {
 //  BEAT DOTS
 // ─────────────────────────────────────────────────────────────
 function buildBeatDots() {
-  const c = document.getElementById('beatCounter');
-  c.innerHTML = '';
+  const counter = document.getElementById('beatCounter');
+  counter.innerHTML = '';
   for (let i = 0; i < 4; i++) {
-    const d = document.createElement('div');
-    d.className = 'beat-dot' + (i === 0 ? ' downbeat' : '');
-    d.id = 'dot' + i;
-    c.appendChild(d);
+    const dot = document.createElement('div');
+    dot.className = 'beat-dot' + (i === 0 ? ' downbeat' : '');
+    dot.id = 'dot' + i;
+    counter.appendChild(dot);
   }
 }
-function lightBeatDot(i) {
-  for (let j = 0; j < 4; j++) {
-    const d = document.getElementById('dot' + j);
-    if (d) d.classList.toggle('active', j === i);
+
+function lightBeatDot(index) {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('dot' + i);
+    if (dot) dot.classList.toggle('active', i === index);
   }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  VALERIE 3-POINT SUBDIVISION
+// ─────────────────────────────────────────────────────────────
+function lightTriplet(index) {
+  for (let i = 0; i < 3; i++) {
+    const step = document.getElementById('triplet' + i);
+    if (step) step.classList.toggle('active', i === index);
+  }
+}
+
+function updateTriplet(t) {
+  if (!song || !song.triplet || !running) {
+    lightTriplet(-1);
+    return;
+  }
+  const subdivision = Math.min(2, Math.floor(t * 3));
+  lightTriplet(subdivision);
 }
 
 // ─────────────────────────────────────────────────────────────
 //  SWING DOTS
 // ─────────────────────────────────────────────────────────────
 function buildSwingDots() {
-  const c = document.getElementById('swingDots');
-  c.innerHTML = '';
+  const container = document.getElementById('swingDots');
+  container.innerHTML = '';
   for (let i = 0; i < MAX_SWINGS; i++) {
-    const d = document.createElement('div');
-    d.className = 'swing-dot';
-    d.id = 'sw' + i;
-    c.appendChild(d);
+    const dot = document.createElement('div');
+    dot.className = 'swing-dot';
+    dot.id = 'sw' + i;
+    container.appendChild(dot);
   }
   document.getElementById('doneMsg').classList.remove('visible');
   document.getElementById('swingWrap').style.display = 'flex';
@@ -494,25 +829,54 @@ function buildSwingDots() {
 
 function updateSwingDots(count) {
   for (let i = 0; i < MAX_SWINGS; i++) {
-    const d = document.getElementById('sw' + i);
-    if (!d) continue;
-    d.classList.remove('done', 'current');
-    if (i < count - 1)        d.classList.add('done');
-    else if (i === count - 1) d.classList.add('current');
+    const dot = document.getElementById('sw' + i);
+    if (!dot) continue;
+    dot.classList.remove('done', 'current');
+    if (i < count - 1) dot.classList.add('done');
+    else if (i === count - 1) dot.classList.add('current');
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-//  WALL TINT
+//  BRIGHT WALL IMPACT
 // ─────────────────────────────────────────────────────────────
+function restartAnimation(element, className) {
+  element.classList.remove(className);
+  void element.offsetWidth;
+  element.classList.add(className);
+}
+
 function wallHit(side) {
-  const wl = document.getElementById('wallLeft');
-  const wr = document.getElementById('wallRight');
-  wl.classList.remove('hit');
-  wr.classList.remove('hit');
-  if (side === 'left')  wl.classList.add('hit');
-  if (side === 'right') wr.classList.add('hit');
-  if (side) setTimeout(() => { wl.classList.remove('hit'); wr.classList.remove('hit'); }, 90);
+  const leftWall = document.getElementById('wallLeft');
+  const rightWall = document.getElementById('wallRight');
+  const sphere = document.getElementById('sphere');
+  const flash = side === 'left'
+    ? document.getElementById('flashLeft')
+    : side === 'right'
+      ? document.getElementById('flashRight')
+      : null;
+
+  leftWall.classList.remove('hit');
+  rightWall.classList.remove('hit');
+  sphere.classList.remove('impact');
+  document.getElementById('flashLeft').classList.remove('flash');
+  document.getElementById('flashRight').classList.remove('flash');
+
+  if (wallTimer) clearTimeout(wallTimer);
+  if (!side) return;
+
+  const activeWall = side === 'left' ? leftWall : rightWall;
+  restartAnimation(activeWall, 'hit');
+  restartAnimation(sphere, 'impact');
+  restartAnimation(flash, 'flash');
+
+  wallTimer = setTimeout(() => {
+    leftWall.classList.remove('hit');
+    rightWall.classList.remove('hit');
+    sphere.classList.remove('impact');
+    document.getElementById('flashLeft').classList.remove('flash');
+    document.getElementById('flashRight').classList.remove('flash');
+  }, 190);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -521,16 +885,18 @@ function wallHit(side) {
 function loop(ts) {
   if (!running) return;
 
-  const beatMs  = 60000 / song.bpm;
+  const beatMs = 60000 / song.bpm;
   const elapsed = ts - legStart;
-  let t = elapsed / beatMs;
+  const t = elapsed / beatMs;
+
+  updateTriplet(Math.min(t, 0.999999));
 
   if (t >= 1) {
     const side = goingRight ? 'right' : 'left';
     placeSphere(goingRight ? 1 : 0);
     wallHit(side);
 
-    beatIdx   = (beatIdx + 1) % 4;
+    beatIdx = (beatIdx + 1) % 4;
     lightBeatDot(beatIdx);
 
     swingCount++;
@@ -538,25 +904,28 @@ function loop(ts) {
 
     if (swingCount >= MAX_SWINGS) {
       if (loopEnabled) {
-        // restart seamlessly
         swingCount = 0;
         goingRight = !goingRight;
-        legStart   = ts;
+        legStart = ts;
         buildSwingDots();
         updateSwingDots(0);
         document.querySelector('.swing-label').textContent = '∞  looping';
+        lightTriplet(0);
         rafId = requestAnimationFrame(loop);
         return;
       }
+
       running = false;
       document.getElementById('doneMsg').classList.add('visible');
       document.getElementById('startBtn').textContent = 'START';
       lightBeatDot(-1);
+      lightTriplet(-1);
       return;
     }
 
     goingRight = !goingRight;
-    legStart   = ts;
+    legStart = ts;
+    lightTriplet(song.triplet ? 0 : -1);
     rafId = requestAnimationFrame(loop);
     return;
   }
@@ -571,12 +940,16 @@ function loop(ts) {
 // ─────────────────────────────────────────────────────────────
 function toggleLoop() {
   loopEnabled = !loopEnabled;
-  const btn = document.getElementById('loopBtn');
-  btn.classList.toggle('active', loopEnabled);
-  // hide done msg if loop just turned on while stopped
+  const button = document.getElementById('loopBtn');
+  button.classList.toggle('active', loopEnabled);
+
   if (loopEnabled) {
-    const dm = document.getElementById('doneMsg');
-    if (dm) dm.classList.remove('visible');
+    document.getElementById('doneMsg').classList.remove('visible');
+  }
+
+  const label = document.querySelector('.swing-label');
+  if (label && document.getElementById('swingWrap').style.display !== 'none') {
+    label.textContent = loopEnabled ? '∞  looping' : 'Swings remaining';
   }
 }
 
@@ -584,74 +957,97 @@ function startMetronome() {
   if (!song) return;
   stopMetronome(true);
 
-  running    = true;
+  running = true;
   goingRight = true;
-  beatIdx    = 0;
+  beatIdx = 0;
   swingCount = 0;
-  legStart   = performance.now();
+  legStart = performance.now();
 
   buildSwingDots();
   updateSwingDots(0);
-  // update label based on loop mode
   document.querySelector('.swing-label').textContent = loopEnabled ? '∞  looping' : 'Swings remaining';
   placeSphere(0);
   lightBeatDot(0);
+  lightTriplet(song.triplet ? 0 : -1);
   wallHit('left');
 
   document.getElementById('startBtn').textContent = 'RESTART';
   rafId = requestAnimationFrame(loop);
 }
 
-function stopMetronome(silent) {
+function stopMetronome(silent = false) {
   running = false;
-  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-  beatIdx    = 0;
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
+  beatIdx = 0;
   goingRight = true;
   swingCount = 0;
 
   placeSphere(0);
   lightBeatDot(-1);
+  lightTriplet(-1);
   wallHit(null);
 
   for (let i = 0; i < MAX_SWINGS; i++) {
-    const d = document.getElementById('sw' + i);
-    if (d) d.classList.remove('done', 'current');
+    const dot = document.getElementById('sw' + i);
+    if (dot) dot.classList.remove('done', 'current');
   }
-  const dm = document.getElementById('doneMsg');
-  if (dm) dm.classList.remove('visible');
 
-  if (!silent) {
-    document.getElementById('startBtn').textContent = 'START';
-  }
+  document.getElementById('doneMsg').classList.remove('visible');
+  if (!silent) document.getElementById('startBtn').textContent = 'START';
 }
 
 // ─────────────────────────────────────────────────────────────
-//  SONG SELECT
+//  DRUM CHART VIEWER
 // ─────────────────────────────────────────────────────────────
-document.getElementById('songSelect').addEventListener('change', function () {
-  const key = this.value;
-  stopMetronome(false);
-  document.getElementById('swingWrap').style.display = 'none';
+function openChart() {
+  if (!song || !song.chart) return;
 
-  if (!key) {
-    song = null;
-    document.getElementById('songTitle').textContent  = 'SELECT A SONG';
-    document.getElementById('songArtist').textContent = 'to begin';
-    document.getElementById('bpmDisplay').textContent = '—';
-    document.getElementById('startBtn').disabled      = true;
-    document.getElementById('beatCounter').innerHTML  = '';
-    return;
-  }
+  const image = document.getElementById('chartImage');
+  const error = document.getElementById('chartError');
+  const modal = document.getElementById('chartModal');
 
-  song = SONGS[key];
-  document.getElementById('songTitle').textContent  = song.title;
-  document.getElementById('songArtist').textContent = song.artist;
-  document.getElementById('bpmDisplay').textContent = song.bpm;
-  document.getElementById('startBtn').disabled      = false;
-  buildBeatDots();
+  document.getElementById('chartTitle').textContent = song.title + ' — DRUM CHART';
+  error.style.display = 'none';
+  image.style.display = 'block';
+  image.alt = song.title + ' drum instructions';
+  image.onload = () => {
+    error.style.display = 'none';
+    image.style.display = 'block';
+  };
+  image.onerror = () => {
+    image.style.display = 'none';
+    error.style.display = 'block';
+    error.innerHTML = `Could not find <code>${song.chart}</code>.<br>Place that image in the same folder as this HTML file, preserving the exact filename and capitalization.`;
+  };
+
+  image.src = song.chart + '?v=' + Date.now();
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeChart() {
+  document.getElementById('chartModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeChartFromBackdrop(event) {
+  if (event.target === document.getElementById('chartModal')) closeChart();
+}
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeChart();
+});
+
+window.addEventListener('resize', () => {
+  placeSphere(running && !goingRight ? 1 : 0);
 });
 
 // ── init ──
+buildSongButtons();
 placeSphere(0);
 </script>
 </body>
