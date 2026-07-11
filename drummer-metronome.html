@@ -54,6 +54,36 @@
     color: var(--accent);
   }
   .logo span { color: var(--text); }
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .wake-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+    color: #555;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+  .wake-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #3a3a3a;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .wake-status.active { color: #93d8a2; }
+  .wake-status.active .wake-dot {
+    background: #64d47d;
+    box-shadow: 0 0 8px rgba(100, 212, 125, 0.75);
+  }
+  .wake-status.warning { color: #c8925e; }
+  .wake-status.warning .wake-dot { background: #b8783e; }
   .time-sig-label {
     font-size: 0.6rem;
     letter-spacing: 0.25em;
@@ -118,22 +148,11 @@
   .song-btn-title {
     display: block;
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 0.09em;
+    font-size: 1.28rem;
+    letter-spacing: 0.075em;
     line-height: 1.05;
   }
-  .song-btn-artist {
-    display: block;
-    margin-top: 3px;
-    color: #5f5f5f;
-    font-size: 0.48rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .song-btn.active .song-btn-artist { color: #a66; }
+
 
   /* ── Current song and compact BPM ── */
   .current-row {
@@ -145,7 +164,7 @@
     min-height: 60px;
   }
   .song-info {
-    text-align: right;
+    text-align: center;
     min-width: 250px;
   }
   .song-title {
@@ -154,13 +173,7 @@
     letter-spacing: 0.1em;
     line-height: 1;
   }
-  .song-artist {
-    margin-top: 4px;
-    font-size: 0.6rem;
-    letter-spacing: 0.24em;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
+
   .bpm-display {
     display: flex;
     align-items: baseline;
@@ -355,45 +368,6 @@
     transform: scale(1.08);
   }
 
-  /* ── Swing counter ── */
-  .swing-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 7px;
-    min-height: 34px;
-  }
-  .swing-label {
-    font-size: 0.56rem;
-    letter-spacing: 0.26em;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-  .swing-dots {
-    display: flex;
-    gap: 7px;
-    align-items: center;
-  }
-  .swing-dot {
-    width: 9px; height: 9px;
-    border-radius: 50%;
-    border: 1px solid #303030;
-    background: #161616;
-    transition: background 0.12s, border-color 0.12s;
-  }
-  .swing-dot.done { background: #393939; border-color: #4c4c4c; }
-  .swing-dot.current { background: var(--accent); border-color: var(--accent); }
-
-  .done-msg {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.3rem;
-    letter-spacing: 0.18em;
-    color: var(--muted);
-    opacity: 0;
-    height: 0;
-    transition: opacity 0.4s;
-  }
-  .done-msg.visible { opacity: 1; height: auto; }
 
   /* ── Controls ── */
   .controls {
@@ -418,22 +392,13 @@
   .btn-primary:hover:not(:disabled) { background: #f05555; }
   .btn-primary:disabled { opacity: 0.32; cursor: default; }
   .btn-secondary,
-  .btn-loop,
   .btn-chart {
     background: transparent;
     color: var(--muted);
     border: 1px solid #2a2a2a;
   }
   .btn-secondary:hover,
-  .btn-loop:hover,
   .btn-chart:hover { color: #aaa; border-color: #444; }
-  .btn-loop {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-  .btn-loop.active { color: var(--accent); border-color: var(--accent); }
-  .loop-icon { font-size: 0.9rem; line-height: 1; }
   .btn-chart {
     display: none;
     color: #d7d7d7;
@@ -543,9 +508,12 @@
 
   @media (max-width: 620px) {
     header { padding: 0 18px; }
+    .header-status { gap: 9px; }
+    .wake-status { font-size: 0.43rem; letter-spacing: 0.08em; }
     main { padding: 72px 12px 48px; gap: 12px; }
     .song-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-    .song-btn { min-height: 43px; padding: 6px 7px; }
+    .song-btn { min-height: 48px; padding: 7px 8px; }
+    .song-btn-title { font-size: 1.18rem; }
     .current-row { gap: 12px; }
     .song-info { min-width: 0; flex: 1; }
     .song-title { font-size: 1.55rem; }
@@ -573,7 +541,13 @@
 
 <header>
   <div class="logo"><span>DRUM</span>TEMPO</div>
-  <div class="time-sig-label">4 / 4</div>
+  <div class="header-status">
+    <div class="wake-status" id="wakeStatus" aria-live="polite">
+      <span class="wake-dot" aria-hidden="true"></span>
+      <span id="wakeStatusText">Screen may sleep</span>
+    </div>
+    <div class="time-sig-label">4 / 4</div>
+  </div>
 </header>
 
 <main>
@@ -585,7 +559,6 @@
   <div class="current-row">
     <div class="song-info">
       <div class="song-title" id="songTitle">SELECT A SONG</div>
-      <div class="song-artist" id="songArtist">to begin</div>
     </div>
     <div class="bpm-display" aria-label="Tempo">
       <div class="bpm-number" id="bpmDisplay">—</div>
@@ -613,15 +586,10 @@
     </div>
   </div>
 
-  <div class="swing-wrap" id="swingWrap" style="display:none">
-    <div class="swing-label">Swings remaining</div>
-    <div class="swing-dots" id="swingDots"></div>
-    <div class="done-msg" id="doneMsg">— DONE —</div>
-  </div>
+
 
   <div class="controls">
     <button class="btn btn-secondary" type="button" onclick="stopMetronome()">STOP</button>
-    <button class="btn btn-loop" type="button" id="loopBtn" onclick="toggleLoop()"><span class="loop-icon">⟳</span> LOOP</button>
     <button class="btn btn-chart" type="button" id="chartBtn" onclick="openChart()">DRUM CHART</button>
     <button class="btn btn-primary" type="button" id="startBtn" onclick="startMetronome()" disabled>START</button>
   </div>
@@ -649,27 +617,33 @@
 <script>
 // ─────────────────────────────────────────────────────────────
 //  SONG DATA
-//  chart filenames are expected beside this HTML file.
+//  Playback loops continuously until STOP is pressed.
+//  Chart filenames are expected beside this HTML file.
 // ─────────────────────────────────────────────────────────────
 const SONGS = {
-  yellow:               { title: 'YELLOW',               artist: 'Coldplay',                 bpm: 86  },
-  this_love:            { title: 'THIS LOVE',            artist: 'Maroon 5',                 bpm: 95  },
-  end_of_beginning:     { title: 'END OF BEGINNING',     artist: 'Djo',                      bpm: 80  },
-  valerie:              { title: 'VALERIE',              artist: 'Amy Winehouse',            bpm: 106, triplet: true },
-  all_star:             { title: 'ALL STAR',             artist: 'Smash Mouth',              bpm: 104, chart: 'AS.jpeg' },
-  living_on_a_prayer:   { title: "LIVIN' ON A PRAYER", artist: 'Bon Jovi',                 bpm: 123 },
-  gives_you_hell:       { title: 'GIVES YOU HELL',       artist: 'The All-American Rejects', bpm: 100 },
-  treasure:             { title: 'TREASURE',             artist: 'Bruno Mars',               bpm: 116 },
-  since_u_been_gone:    { title: 'SINCE U BEEN GONE',    artist: 'Kelly Clarkson',           bpm: 132, chart: 'Since.jpeg' },
-  shut_up_and_dance:    { title: 'SHUT UP AND DANCE',    artist: 'Walk the Moon',            bpm: 128, chart: 'SnD.jpeg' }
+  yellow:               { title: 'YELLOW',             bpm: 86  },
+  this_love:            { title: 'THIS LOVE',          bpm: 95  },
+  valerie:              { title: 'VALERIE',            bpm: 106, triplet: true },
+  all_star:             { title: 'ALL STAR',           bpm: 104, chart: 'AS.jpeg' },
+  living_on_a_prayer:   { title: "LIVIN' ON A PRAYER", bpm: 123 },
+  gives_you_hell:       { title: 'GIVES YOU HELL',     bpm: 100 },
+  treasure:             { title: 'TREASURE',           bpm: 116 },
+  since_u_been_gone:    { title: 'SINCE U BEEN GONE',  bpm: 132, chart: 'Since.jpeg' },
+  shut_up_and_dance:    { title: 'SHUT UP AND DANCE',  bpm: 128, chart: 'SnD.jpeg' }
 };
 
 const SONG_ORDER = [
-  'yellow', 'this_love', 'end_of_beginning', 'valerie', 'all_star',
-  'living_on_a_prayer', 'gives_you_hell', 'treasure', 'since_u_been_gone', 'shut_up_and_dance'
+  'shut_up_and_dance',
+  'treasure',
+  'all_star',
+  'gives_you_hell',
+  'yellow',
+  'this_love',
+  'valerie',
+  'since_u_been_gone',
+  'living_on_a_prayer'
 ];
 
-const MAX_SWINGS = 12;
 
 // ─────────────────────────────────────────────────────────────
 //  STATE
@@ -681,8 +655,8 @@ let rafId = null;
 let legStart = 0;
 let goingRight = true;
 let beatIdx = 0;
-let swingCount = 0;
-let loopEnabled = false;
+let wakeLock = null;
+let wakeLockRequestPending = false;
 let wallTimer = null;
 
 // ─────────────────────────────────────────────────────────────
@@ -692,7 +666,7 @@ function buildSongButtons() {
   const grid = document.getElementById('songGrid');
   grid.innerHTML = '';
 
-  SONG_ORDER.forEach((key) => {
+  SONG_ORDER.forEach((key, index) => {
     const item = SONGS[key];
     const button = document.createElement('button');
     button.type = 'button';
@@ -700,19 +674,30 @@ function buildSongButtons() {
     button.dataset.song = key;
     button.setAttribute('role', 'radio');
     button.setAttribute('aria-checked', 'false');
-    button.innerHTML = `<span class="song-btn-title">${item.title}</span><span class="song-btn-artist">${item.artist}</span>`;
+    button.innerHTML = `<span class="song-btn-title">${index + 1}. ${item.title}</span>`;
     button.addEventListener('click', () => selectSong(key));
     grid.appendChild(button);
   });
 }
 
 function selectSong(key) {
-  stopMetronome(false);
-  closeChart();
-  document.getElementById('swingWrap').style.display = 'none';
+  const now = performance.now();
+  let legProgress = 0;
 
+  // Preserve the ball's current position when changing tempo mid-play.
+  if (running && song) {
+    const oldBeatMs = 60000 / song.bpm;
+    legProgress = Math.max(0, Math.min(0.999999, (now - legStart) / oldBeatMs));
+  }
+
+  closeChart();
   selectedKey = key;
   song = SONGS[key];
+
+  if (running) {
+    const newBeatMs = 60000 / song.bpm;
+    legStart = now - legProgress * newBeatMs;
+  }
 
   document.querySelectorAll('.song-btn').forEach((button) => {
     const active = button.dataset.song === key;
@@ -721,17 +706,16 @@ function selectSong(key) {
   });
 
   document.getElementById('songTitle').textContent = song.title;
-  document.getElementById('songArtist').textContent = song.artist;
   document.getElementById('bpmDisplay').textContent = song.bpm;
   document.getElementById('startBtn').disabled = false;
 
   const chartBtn = document.getElementById('chartBtn');
   chartBtn.classList.toggle('visible', Boolean(song.chart));
-  chartBtn.textContent = song.chart ? 'DRUM CHART' : 'DRUM CHART';
 
   document.getElementById('tripletWrap').classList.toggle('visible', Boolean(song.triplet));
-  lightTriplet(-1);
   buildBeatDots();
+  lightBeatDot(running ? beatIdx : -1);
+  lightTriplet(running && song.triplet ? 0 : -1);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -812,32 +796,6 @@ function updateTriplet(t) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  SWING DOTS
-// ─────────────────────────────────────────────────────────────
-function buildSwingDots() {
-  const container = document.getElementById('swingDots');
-  container.innerHTML = '';
-  for (let i = 0; i < MAX_SWINGS; i++) {
-    const dot = document.createElement('div');
-    dot.className = 'swing-dot';
-    dot.id = 'sw' + i;
-    container.appendChild(dot);
-  }
-  document.getElementById('doneMsg').classList.remove('visible');
-  document.getElementById('swingWrap').style.display = 'flex';
-}
-
-function updateSwingDots(count) {
-  for (let i = 0; i < MAX_SWINGS; i++) {
-    const dot = document.getElementById('sw' + i);
-    if (!dot) continue;
-    dot.classList.remove('done', 'current');
-    if (i < count - 1) dot.classList.add('done');
-    else if (i === count - 1) dot.classList.add('current');
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
 //  BRIGHT WALL IMPACT
 // ─────────────────────────────────────────────────────────────
 function restartAnimation(element, className) {
@@ -883,7 +841,7 @@ function wallHit(side) {
 //  ANIMATION LOOP
 // ─────────────────────────────────────────────────────────────
 function loop(ts) {
-  if (!running) return;
+  if (!running || !song) return;
 
   const beatMs = 60000 / song.bpm;
   const elapsed = ts - legStart;
@@ -899,30 +857,6 @@ function loop(ts) {
     beatIdx = (beatIdx + 1) % 4;
     lightBeatDot(beatIdx);
 
-    swingCount++;
-    updateSwingDots(swingCount);
-
-    if (swingCount >= MAX_SWINGS) {
-      if (loopEnabled) {
-        swingCount = 0;
-        goingRight = !goingRight;
-        legStart = ts;
-        buildSwingDots();
-        updateSwingDots(0);
-        document.querySelector('.swing-label').textContent = '∞  looping';
-        lightTriplet(0);
-        rafId = requestAnimationFrame(loop);
-        return;
-      }
-
-      running = false;
-      document.getElementById('doneMsg').classList.add('visible');
-      document.getElementById('startBtn').textContent = 'START';
-      lightBeatDot(-1);
-      lightTriplet(-1);
-      return;
-    }
-
     goingRight = !goingRight;
     legStart = ts;
     lightTriplet(song.triplet ? 0 : -1);
@@ -936,36 +870,112 @@ function loop(ts) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  CONTROLS
+//  SCREEN WAKE LOCK
 // ─────────────────────────────────────────────────────────────
-function toggleLoop() {
-  loopEnabled = !loopEnabled;
-  const button = document.getElementById('loopBtn');
-  button.classList.toggle('active', loopEnabled);
+function setWakeStatus(state) {
+  const status = document.getElementById('wakeStatus');
+  const text = document.getElementById('wakeStatusText');
+  if (!status || !text) return;
 
-  if (loopEnabled) {
-    document.getElementById('doneMsg').classList.remove('visible');
-  }
+  status.classList.remove('active', 'warning');
 
-  const label = document.querySelector('.swing-label');
-  if (label && document.getElementById('swingWrap').style.display !== 'none') {
-    label.textContent = loopEnabled ? '∞  looping' : 'Swings remaining';
+  if (state === 'active') {
+    status.classList.add('active');
+    text.textContent = 'Screen awake';
+  } else if (state === 'unsupported') {
+    status.classList.add('warning');
+    text.textContent = 'Wake lock unavailable';
+  } else if (state === 'blocked') {
+    status.classList.add('warning');
+    text.textContent = 'Wake lock blocked';
+  } else {
+    text.textContent = 'Screen may sleep';
   }
 }
+
+async function requestWakeLock() {
+  if (!running || document.visibilityState !== 'visible') return;
+
+  if (!('wakeLock' in navigator)) {
+    setWakeStatus('unsupported');
+    return;
+  }
+
+  if (wakeLock || wakeLockRequestPending) return;
+  wakeLockRequestPending = true;
+
+  try {
+    const requestedLock = await navigator.wakeLock.request('screen');
+
+    // The user may have pressed STOP while the browser was granting it.
+    if (!running) {
+      await requestedLock.release();
+      setWakeStatus('idle');
+      return;
+    }
+
+    wakeLock = requestedLock;
+    setWakeStatus('active');
+
+    requestedLock.addEventListener('release', () => {
+      if (wakeLock === requestedLock) wakeLock = null;
+
+      if (running && document.visibilityState === 'visible') {
+        setWakeStatus('idle');
+        requestWakeLock();
+      } else {
+        setWakeStatus('idle');
+      }
+    });
+  } catch (error) {
+    wakeLock = null;
+    setWakeStatus('blocked');
+    console.warn('Screen Wake Lock could not be activated:', error);
+  } finally {
+    wakeLockRequestPending = false;
+  }
+}
+
+async function releaseWakeLock() {
+  const currentLock = wakeLock;
+  wakeLock = null;
+
+  if (currentLock && !currentLock.released) {
+    try {
+      await currentLock.release();
+    } catch (error) {
+      console.warn('Screen Wake Lock could not be released:', error);
+    }
+  }
+
+  if (!running) setWakeStatus('idle');
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && running) {
+    requestWakeLock();
+  }
+});
+
+window.addEventListener('pagehide', () => {
+  releaseWakeLock();
+});
+
+// ─────────────────────────────────────────────────────────────
+//  CONTROLS
+// ─────────────────────────────────────────────────────────────
+
 
 function startMetronome() {
   if (!song) return;
   stopMetronome(true);
 
   running = true;
+  requestWakeLock();
   goingRight = true;
   beatIdx = 0;
-  swingCount = 0;
   legStart = performance.now();
 
-  buildSwingDots();
-  updateSwingDots(0);
-  document.querySelector('.swing-label').textContent = loopEnabled ? '∞  looping' : 'Swings remaining';
   placeSphere(0);
   lightBeatDot(0);
   lightTriplet(song.triplet ? 0 : -1);
@@ -977,6 +987,7 @@ function startMetronome() {
 
 function stopMetronome(silent = false) {
   running = false;
+  releaseWakeLock();
   if (rafId) {
     cancelAnimationFrame(rafId);
     rafId = null;
@@ -984,19 +995,12 @@ function stopMetronome(silent = false) {
 
   beatIdx = 0;
   goingRight = true;
-  swingCount = 0;
 
   placeSphere(0);
   lightBeatDot(-1);
   lightTriplet(-1);
   wallHit(null);
 
-  for (let i = 0; i < MAX_SWINGS; i++) {
-    const dot = document.getElementById('sw' + i);
-    if (dot) dot.classList.remove('done', 'current');
-  }
-
-  document.getElementById('doneMsg').classList.remove('visible');
   if (!silent) document.getElementById('startBtn').textContent = 'START';
 }
 
