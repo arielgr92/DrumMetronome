@@ -327,27 +327,27 @@
     box-shadow: 0 0 9px rgba(232, 64, 64, 0.7);
   }
 
-  /* ── Valerie 3-point split ── */
-  .triplet-wrap {
+  /* ── Valerie 4-point subdivision ── */
+  .subdivision-wrap {
     display: none;
     flex-direction: column;
     align-items: center;
     gap: 6px;
     min-height: 38px;
   }
-  .triplet-wrap.visible { display: flex; }
-  .triplet-label {
+  .subdivision-wrap.visible { display: flex; }
+  .subdivision-label {
     font-size: 0.56rem;
     letter-spacing: 0.25em;
     color: var(--muted);
     text-transform: uppercase;
   }
-  .triplet-count {
+  .subdivision-count {
     display: flex;
     align-items: center;
     gap: 11px;
   }
-  .triplet-step {
+  .subdivision-step {
     width: 29px;
     height: 29px;
     display: grid;
@@ -360,7 +360,7 @@
     font-size: 1.05rem;
     transition: background 0.07s, color 0.07s, border-color 0.07s, box-shadow 0.07s, transform 0.07s;
   }
-  .triplet-step.active {
+  .subdivision-step.active {
     background: var(--accent);
     color: #fff;
     border-color: #ff8888;
@@ -481,6 +481,158 @@
   }
   .chart-error code { color: #fff; }
 
+
+  /* ── Metronome dock inside drum-chart viewer ── */
+  .chart-metronome-dock {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: minmax(130px, auto) minmax(260px, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    min-height: 96px;
+    padding: 10px 12px;
+    background: #0b0b0b;
+    border: 1px solid #242424;
+    border-radius: 4px;
+  }
+  .chart-metronome-info {
+    min-width: 0;
+  }
+  .chart-metronome-song {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+  }
+  .chart-metronome-bpm {
+    color: var(--accent);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.65rem;
+    line-height: 1;
+  }
+  .chart-metronome-bpm small {
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.46rem;
+    letter-spacing: 0.16em;
+  }
+  .mini-metronome-center {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .mini-stage {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    height: 48px;
+  }
+  .mini-track {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 50%;
+    height: 2px;
+    transform: translateY(-50%);
+    border-radius: 2px;
+    background: #303030;
+  }
+  .mini-wall {
+    position: absolute;
+    top: 50%;
+    width: 8px;
+    height: 39px;
+    transform: translateY(-50%);
+    border: 1px solid #555;
+    border-radius: 2px;
+    background: #292929;
+    transition: background 0.08s, border-color 0.08s, box-shadow 0.08s;
+  }
+  .mini-wall.left { left: 12px; }
+  .mini-wall.right { right: 12px; }
+  .mini-wall.hit {
+    background: #8a3438;
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(255, 95, 95, 0.95), 0 0 22px rgba(232, 64, 64, 0.65);
+  }
+  .mini-sphere-wrap {
+    position: absolute;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    transform: translateY(-50%) translateX(-50%);
+    will-change: left;
+  }
+  .mini-sphere {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, #ffb3b3 0%, var(--accent) 48%, #6e0000 100%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.75);
+  }
+  .mini-sphere.impact {
+    animation: miniBallImpact 145ms ease-out;
+  }
+  @keyframes miniBallImpact {
+    0% { filter: brightness(2.2); box-shadow: 0 0 16px rgba(255,95,95,0.95); transform: scale(1.18); }
+    100% { filter: brightness(1); box-shadow: 0 2px 8px rgba(0,0,0,0.75); transform: scale(1); }
+  }
+  .mini-counters {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    min-height: 12px;
+  }
+  .mini-beat-counter,
+  .mini-subdivision-counter {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .mini-beat-dot,
+  .mini-subdivision-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1px solid #3b3b3b;
+    background: #181818;
+  }
+  .mini-beat-dot.downbeat { width: 9px; height: 9px; }
+  .mini-beat-dot.active,
+  .mini-subdivision-dot.active {
+    background: var(--accent);
+    border-color: var(--accent-bright);
+    box-shadow: 0 0 7px rgba(232,64,64,0.75);
+  }
+  .mini-subdivision-counter { display: none; }
+  .mini-subdivision-counter.visible { display: flex; }
+  .chart-metronome-controls {
+    display: flex;
+    gap: 7px;
+  }
+  .chart-mini-btn {
+    padding: 7px 10px;
+    border: 1px solid #333;
+    border-radius: 3px;
+    background: #171717;
+    color: #aaa;
+    cursor: pointer;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+  }
+  .chart-mini-btn.primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
+  .chart-mini-btn:hover { color: #fff; border-color: #666; }
+
   footer {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -524,6 +676,22 @@
     .track-groove { left: 42px; right: 42px; }
     .btn { padding: 9px 18px; }
     footer { display: none; }
+
+    .chart-modal { padding: 10px; }
+    .chart-panel { width: 100%; height: 96vh; padding: 10px; }
+    .chart-metronome-dock {
+      grid-template-columns: 1fr auto;
+      gap: 8px 10px;
+      min-height: 112px;
+    }
+    .mini-metronome-center {
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+    .chart-metronome-info { grid-column: 1; grid-row: 2; }
+    .chart-metronome-controls { grid-column: 2; grid-row: 2; }
+    .chart-metronome-song { font-size: 0.95rem; }
+    .chart-metronome-bpm { font-size: 1.35rem; }
   }
 
   @media (max-height: 780px) and (min-width: 700px) {
@@ -577,12 +745,13 @@
 
   <div class="beat-counter" id="beatCounter"></div>
 
-  <div class="triplet-wrap" id="tripletWrap" aria-live="polite">
-    <div class="triplet-label">Valerie · 3-point split</div>
-    <div class="triplet-count">
-      <div class="triplet-step" id="triplet0">1</div>
-      <div class="triplet-step" id="triplet1">2</div>
-      <div class="triplet-step" id="triplet2">3</div>
+  <div class="subdivision-wrap" id="subdivisionWrap" aria-live="polite">
+    <div class="subdivision-label">Valerie · 4-part subdivision</div>
+    <div class="subdivision-count">
+      <div class="subdivision-step" id="subdivision0">1</div>
+      <div class="subdivision-step" id="subdivision1">2</div>
+      <div class="subdivision-step" id="subdivision2">3</div>
+      <div class="subdivision-step" id="subdivision3">4</div>
     </div>
   </div>
 
@@ -605,6 +774,28 @@
       <img class="chart-image" id="chartImage" src="" alt="Drum instructions">
       <div class="chart-error" id="chartError"></div>
     </div>
+    <div class="chart-metronome-dock" aria-label="Metronome visible while reading the drum chart">
+      <div class="chart-metronome-info">
+        <div class="chart-metronome-song" id="chartMetronomeSong">SELECT A SONG</div>
+        <div class="chart-metronome-bpm"><span id="chartMetronomeBpm">—</span> <small>BPM</small></div>
+      </div>
+      <div class="mini-metronome-center">
+        <div class="mini-stage" id="miniStage">
+          <div class="mini-track"></div>
+          <div class="mini-wall left" id="miniWallLeft"></div>
+          <div class="mini-wall right" id="miniWallRight"></div>
+          <div class="mini-sphere-wrap" id="miniSphereWrap"><div class="mini-sphere" id="miniSphere"></div></div>
+        </div>
+        <div class="mini-counters">
+          <div class="mini-beat-counter" id="miniBeatCounter"></div>
+          <div class="mini-subdivision-counter" id="miniSubdivisionCounter" aria-label="Valerie four-part subdivision"></div>
+        </div>
+      </div>
+      <div class="chart-metronome-controls">
+        <button class="chart-mini-btn" type="button" onclick="stopMetronome()">STOP</button>
+        <button class="chart-mini-btn primary" type="button" onclick="startMetronome()">START / RESTART</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -623,7 +814,7 @@
 const SONGS = {
   yellow:               { title: 'YELLOW',             bpm: 86  },
   this_love:            { title: 'THIS LOVE',          bpm: 95  },
-  valerie:              { title: 'VALERIE',            bpm: 106, triplet: true },
+  valerie:              { title: 'VALERIE',            bpm: 106, subdivisions: 4 },
   all_star:             { title: 'ALL STAR',           bpm: 104, chart: 'AS.jpeg' },
   living_on_a_prayer:   { title: "LIVIN' ON A PRAYER", bpm: 123 },
   gives_you_hell:       { title: 'GIVES YOU HELL',     bpm: 100 },
@@ -712,10 +903,14 @@ function selectSong(key) {
   const chartBtn = document.getElementById('chartBtn');
   chartBtn.classList.toggle('visible', Boolean(song.chart));
 
-  document.getElementById('tripletWrap').classList.toggle('visible', Boolean(song.triplet));
+  document.getElementById('subdivisionWrap').classList.toggle('visible', Boolean(song.subdivisions));
+  document.getElementById('miniSubdivisionCounter').classList.toggle('visible', Boolean(song.subdivisions));
+  document.getElementById('chartMetronomeSong').textContent = song.title;
+  document.getElementById('chartMetronomeBpm').textContent = song.bpm;
   buildBeatDots();
+  buildSubdivisionDots();
   lightBeatDot(running ? beatIdx : -1);
-  lightTriplet(running && song.triplet ? 0 : -1);
+  lightSubdivision(running && song.subdivisions ? 0 : -1);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -734,9 +929,29 @@ function getStageBounds() {
   };
 }
 
+function getMiniStageBounds() {
+  const stage = document.getElementById('miniStage');
+  if (!stage) return { xLeft: 24, xRight: 24 };
+  const width = stage.offsetWidth;
+  const sphereSize = 24;
+  const wallWidth = 8;
+  const pad = 12;
+
+  return {
+    xLeft: pad + wallWidth + sphereSize / 2,
+    xRight: width - pad - wallWidth - sphereSize / 2
+  };
+}
+
 function placeSphere(t) {
   const { xLeft, xRight } = getStageBounds();
   document.getElementById('sphereWrap').style.left = (xLeft + t * (xRight - xLeft)) + 'px';
+
+  const mini = document.getElementById('miniSphereWrap');
+  if (mini) {
+    const miniBounds = getMiniStageBounds();
+    mini.style.left = (miniBounds.xLeft + t * (miniBounds.xRight - miniBounds.xLeft)) + 'px';
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -760,39 +975,65 @@ function ballEase(t) {
 // ─────────────────────────────────────────────────────────────
 function buildBeatDots() {
   const counter = document.getElementById('beatCounter');
+  const miniCounter = document.getElementById('miniBeatCounter');
   counter.innerHTML = '';
+  miniCounter.innerHTML = '';
+
   for (let i = 0; i < 4; i++) {
     const dot = document.createElement('div');
     dot.className = 'beat-dot' + (i === 0 ? ' downbeat' : '');
     dot.id = 'dot' + i;
     counter.appendChild(dot);
+
+    const miniDot = document.createElement('div');
+    miniDot.className = 'mini-beat-dot' + (i === 0 ? ' downbeat' : '');
+    miniDot.id = 'miniDot' + i;
+    miniCounter.appendChild(miniDot);
   }
 }
 
 function lightBeatDot(index) {
   for (let i = 0; i < 4; i++) {
     const dot = document.getElementById('dot' + i);
+    const miniDot = document.getElementById('miniDot' + i);
     if (dot) dot.classList.toggle('active', i === index);
+    if (miniDot) miniDot.classList.toggle('active', i === index);
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-//  VALERIE 3-POINT SUBDIVISION
+//  VALERIE 4-PART SUBDIVISION
 // ─────────────────────────────────────────────────────────────
-function lightTriplet(index) {
-  for (let i = 0; i < 3; i++) {
-    const step = document.getElementById('triplet' + i);
+function buildSubdivisionDots() {
+  const miniCounter = document.getElementById('miniSubdivisionCounter');
+  miniCounter.innerHTML = '';
+  const count = song && song.subdivisions ? song.subdivisions : 0;
+
+  for (let i = 0; i < count; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'mini-subdivision-dot';
+    dot.id = 'miniSubdivision' + i;
+    miniCounter.appendChild(dot);
+  }
+}
+
+function lightSubdivision(index) {
+  const count = song && song.subdivisions ? song.subdivisions : 4;
+  for (let i = 0; i < count; i++) {
+    const step = document.getElementById('subdivision' + i);
+    const miniStep = document.getElementById('miniSubdivision' + i);
     if (step) step.classList.toggle('active', i === index);
+    if (miniStep) miniStep.classList.toggle('active', i === index);
   }
 }
 
-function updateTriplet(t) {
-  if (!song || !song.triplet || !running) {
-    lightTriplet(-1);
+function updateSubdivision(t) {
+  if (!song || !song.subdivisions || !running) {
+    lightSubdivision(-1);
     return;
   }
-  const subdivision = Math.min(2, Math.floor(t * 3));
-  lightTriplet(subdivision);
+  const subdivision = Math.min(song.subdivisions - 1, Math.floor(t * song.subdivisions));
+  lightSubdivision(subdivision);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -808,6 +1049,9 @@ function wallHit(side) {
   const leftWall = document.getElementById('wallLeft');
   const rightWall = document.getElementById('wallRight');
   const sphere = document.getElementById('sphere');
+  const miniLeftWall = document.getElementById('miniWallLeft');
+  const miniRightWall = document.getElementById('miniWallRight');
+  const miniSphere = document.getElementById('miniSphere');
   const flash = side === 'left'
     ? document.getElementById('flashLeft')
     : side === 'right'
@@ -817,6 +1061,9 @@ function wallHit(side) {
   leftWall.classList.remove('hit');
   rightWall.classList.remove('hit');
   sphere.classList.remove('impact');
+  miniLeftWall.classList.remove('hit');
+  miniRightWall.classList.remove('hit');
+  miniSphere.classList.remove('impact');
   document.getElementById('flashLeft').classList.remove('flash');
   document.getElementById('flashRight').classList.remove('flash');
 
@@ -826,12 +1073,17 @@ function wallHit(side) {
   const activeWall = side === 'left' ? leftWall : rightWall;
   restartAnimation(activeWall, 'hit');
   restartAnimation(sphere, 'impact');
+  restartAnimation(side === 'left' ? miniLeftWall : miniRightWall, 'hit');
+  restartAnimation(miniSphere, 'impact');
   restartAnimation(flash, 'flash');
 
   wallTimer = setTimeout(() => {
     leftWall.classList.remove('hit');
     rightWall.classList.remove('hit');
     sphere.classList.remove('impact');
+    miniLeftWall.classList.remove('hit');
+    miniRightWall.classList.remove('hit');
+    miniSphere.classList.remove('impact');
     document.getElementById('flashLeft').classList.remove('flash');
     document.getElementById('flashRight').classList.remove('flash');
   }, 190);
@@ -847,7 +1099,7 @@ function loop(ts) {
   const elapsed = ts - legStart;
   const t = elapsed / beatMs;
 
-  updateTriplet(Math.min(t, 0.999999));
+  updateSubdivision(Math.min(t, 0.999999));
 
   if (t >= 1) {
     const side = goingRight ? 'right' : 'left';
@@ -859,7 +1111,7 @@ function loop(ts) {
 
     goingRight = !goingRight;
     legStart = ts;
-    lightTriplet(song.triplet ? 0 : -1);
+    lightSubdivision(song.subdivisions ? 0 : -1);
     rafId = requestAnimationFrame(loop);
     return;
   }
@@ -978,7 +1230,7 @@ function startMetronome() {
 
   placeSphere(0);
   lightBeatDot(0);
-  lightTriplet(song.triplet ? 0 : -1);
+  lightSubdivision(song.subdivisions ? 0 : -1);
   wallHit('left');
 
   document.getElementById('startBtn').textContent = 'RESTART';
@@ -998,7 +1250,7 @@ function stopMetronome(silent = false) {
 
   placeSphere(0);
   lightBeatDot(-1);
-  lightTriplet(-1);
+  lightSubdivision(-1);
   wallHit(null);
 
   if (!silent) document.getElementById('startBtn').textContent = 'START';
@@ -1015,6 +1267,8 @@ function openChart() {
   const modal = document.getElementById('chartModal');
 
   document.getElementById('chartTitle').textContent = song.title + ' — DRUM CHART';
+  document.getElementById('chartMetronomeSong').textContent = song.title;
+  document.getElementById('chartMetronomeBpm').textContent = song.bpm;
   error.style.display = 'none';
   image.style.display = 'block';
   image.alt = song.title + ' drum instructions';
@@ -1047,11 +1301,20 @@ document.addEventListener('keydown', (event) => {
 });
 
 window.addEventListener('resize', () => {
-  placeSphere(running && !goingRight ? 1 : 0);
+  if (!running || !song) {
+    placeSphere(0);
+    return;
+  }
+  const beatMs = 60000 / song.bpm;
+  const t = Math.max(0, Math.min(1, (performance.now() - legStart) / beatMs));
+  const eased = ballEase(t);
+  placeSphere(goingRight ? eased : 1 - eased);
 });
 
 // ── init ──
 buildSongButtons();
+buildBeatDots();
+buildSubdivisionDots();
 placeSphere(0);
 </script>
 </body>
