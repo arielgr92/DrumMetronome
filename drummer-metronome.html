@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>DRUMTEMPO — Metronome Visualizer</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -405,6 +405,18 @@
   }
   .btn-chart.visible { display: inline-block; }
 
+  /* ── Sound toggle ── */
+  .btn-secondary.muted,
+  .chart-mini-btn.muted {
+    color: #3d3d3d;
+    border-color: #202020;
+  }
+  .btn-secondary:not(.muted),
+  .chart-mini-btn:not(.muted) {
+    color: #cfa8a8;
+    border-color: #4a2b2b;
+  }
+
   /* ── Drum chart modal ── */
   .chart-modal {
     position: fixed;
@@ -613,6 +625,7 @@
   .mini-subdivision-counter.visible { display: flex; }
   .chart-metronome-controls {
     display: flex;
+    flex-wrap: wrap;
     gap: 7px;
   }
   .chart-mini-btn {
@@ -759,6 +772,7 @@
 
   <div class="controls">
     <button class="btn btn-secondary" type="button" onclick="stopMetronome()">STOP</button>
+    <button class="btn btn-secondary" type="button" id="soundToggleBtn" onclick="toggleSound()" aria-pressed="true">CLICK: ON</button>
     <button class="btn btn-chart" type="button" id="chartBtn" onclick="openChart()">DRUM CHART</button>
     <button class="btn btn-primary" type="button" id="startBtn" onclick="startMetronome()" disabled>START</button>
   </div>
@@ -793,6 +807,7 @@
       </div>
       <div class="chart-metronome-controls">
         <button class="chart-mini-btn" type="button" onclick="stopMetronome()">STOP</button>
+        <button class="chart-mini-btn" type="button" id="chartSoundToggleBtn" onclick="toggleSound()" aria-pressed="true">CLICK: ON</button>
         <button class="chart-mini-btn primary" type="button" onclick="startMetronome()">START / RESTART</button>
       </div>
     </div>
@@ -851,6 +866,77 @@ let beatIdx = 0;
 let wakeLock = null;
 let wakeLockRequestPending = false;
 let wallTimer = null;
+
+// ─────────────────────────────────────────────────────────────
+//  CLICK SOUND (Web Audio API — deep bass click, accented on beat 1)
+// ─────────────────────────────────────────────────────────────
+let soundEnabled = true;
+let audioCtx = null;
+
+function ensureAudioContext() {
+  if (!audioCtx) {
+    const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtxClass) return null;
+    audioCtx = new AudioCtxClass();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function playClick(accent) {
+  if (!soundEnabled) return;
+  const ctx = ensureAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+
+  // Deep bass thump: a sine oscillator with a fast pitch drop and a very
+  // short percussive amplitude envelope. The downbeat (accent) is louder
+  // and starts a touch higher for extra punch.
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  const startFreq = accent ? 105 : 75;
+  const endFreq = accent ? 45 : 38;
+  osc.frequency.setValueAtTime(startFreq, now);
+  osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.09);
+
+  const peak = accent ? 0.95 : 0.55;
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(peak, now + 0.004);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + 0.13);
+}
+
+function updateSoundButtons() {
+  const label = soundEnabled ? 'CLICK: ON' : 'CLICK: OFF';
+  const mainBtn = document.getElementById('soundToggleBtn');
+  const chartBtnEl = document.getElementById('chartSoundToggleBtn');
+
+  if (mainBtn) {
+    mainBtn.textContent = label;
+    mainBtn.classList.toggle('muted', !soundEnabled);
+    mainBtn.setAttribute('aria-pressed', String(soundEnabled));
+  }
+  if (chartBtnEl) {
+    chartBtnEl.textContent = label;
+    chartBtnEl.classList.toggle('muted', !soundEnabled);
+    chartBtnEl.setAttribute('aria-pressed', String(soundEnabled));
+  }
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  if (soundEnabled) ensureAudioContext();
+  updateSoundButtons();
+}
 
 // ─────────────────────────────────────────────────────────────
 //  SONG BUTTONS
@@ -1110,6 +1196,7 @@ function loop(ts) {
 
     beatIdx = (beatIdx + 1) % 4;
     lightBeatDot(beatIdx);
+    playClick(beatIdx === 0);
 
     goingRight = !goingRight;
     legStart = ts;
@@ -1226,6 +1313,7 @@ function startMetronome() {
 
   running = true;
   requestWakeLock();
+  ensureAudioContext();
   goingRight = true;
   beatIdx = 0;
   legStart = performance.now();
@@ -1234,6 +1322,7 @@ function startMetronome() {
   lightBeatDot(0);
   lightSubdivision(song.subdivisions ? 0 : -1);
   wallHit('left');
+  playClick(true);
 
   document.getElementById('startBtn').textContent = 'RESTART';
   rafId = requestAnimationFrame(loop);
@@ -1318,6 +1407,7 @@ buildSongButtons();
 buildBeatDots();
 buildSubdivisionDots();
 placeSphere(0);
+updateSoundButtons();
 </script>
 </body>
 </html>
