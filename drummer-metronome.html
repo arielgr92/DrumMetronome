@@ -873,22 +873,35 @@ let wallTimer = null;
 let soundEnabled = true;
 let audioCtx = null;
 
-function ensureAudioContext() {
+async function ensureAudioContext() {
   if (!audioCtx) {
     const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtxClass) return null;
     audioCtx = new AudioCtxClass();
   }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
+
+  try {
+    // On current iOS Safari, explicitly declaring playback prevents this
+    // metronome click from being treated like a muted transient sound.
+    if (navigator.audioSession) {
+      navigator.audioSession.type = 'playback';
+    }
+
+    // iPhone Safari resumes AudioContext asynchronously. Wait until it is
+    // running before scheduling the first oscillator.
+    if (audioCtx.state !== 'running') {
+      await audioCtx.resume();
+    }
+    return audioCtx.state === 'running' ? audioCtx : null;
+  } catch (error) {
+    console.warn('Audio could not start:', error);
+    return null;
   }
-  return audioCtx;
 }
 
-function playClick(accent) {
+function playClick(accent, ctx = audioCtx) {
   if (!soundEnabled) return;
-  const ctx = ensureAudioContext();
-  if (!ctx) return;
+  if (!ctx || ctx.state !== 'running') return;
 
   const now = ctx.currentTime;
 
@@ -932,9 +945,9 @@ function updateSoundButtons() {
   }
 }
 
-function toggleSound() {
+async function toggleSound() {
   soundEnabled = !soundEnabled;
-  if (soundEnabled) ensureAudioContext();
+  if (soundEnabled) await ensureAudioContext();
   updateSoundButtons();
 }
 
@@ -1307,13 +1320,16 @@ window.addEventListener('pagehide', () => {
 // ─────────────────────────────────────────────────────────────
 
 
-function startMetronome() {
+async function startMetronome() {
   if (!song) return;
   stopMetronome(true);
 
+  // Must happen directly from the Start-button gesture for iPhone Safari.
+  const ctx = await ensureAudioContext();
+  if (!ctx) return;
+
   running = true;
   requestWakeLock();
-  ensureAudioContext();
   goingRight = true;
   beatIdx = 0;
   legStart = performance.now();
@@ -1322,7 +1338,7 @@ function startMetronome() {
   lightBeatDot(0);
   lightSubdivision(song.subdivisions ? 0 : -1);
   wallHit('left');
-  playClick(true);
+  playClick(true, ctx);
 
   document.getElementById('startBtn').textContent = 'RESTART';
   rafId = requestAnimationFrame(loop);
